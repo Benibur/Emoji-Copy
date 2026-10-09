@@ -8,14 +8,22 @@
       <description>Possible values can be 'top' or 'bottom'.</description>
     </key>
     <key type="i" name="nbcols">
+      <range min="1" max="40"/>
       <default>11</default>
       <summary>Number of emojis per line</summary>
       <description>Sets the number of column of emojis to display.</description>
     </key>
     <key type="i" name="emojisize">
+      <range min="8" max="128"/>
       <default>30</default>
-      <summary>Default size of emojis</summary>
-      <description>Default size of emojis (px) ; doesn't concern recently used items</description>
+      <summary>Size of emojis</summary>
+      <description>Size of emojis (px), for both recently used emojis and categories.</description>
+    </key>
+    <key type="i" name="recent-rows">
+      <range min="1" max="5"/>
+      <default>1</default>
+      <summary>Number of rows of recently used emojis</summary>
+      <description>Number of rows used to display recently used emojis and search results.</description>
     </key>
     <key type="as" name="recently-used">
       <default>

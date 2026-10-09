@@ -137,6 +137,9 @@ export default class EmojiCopy extends Extension {
       "changed::nbcols", () => {
         this.updateNbCols();
       },
+      "changed::recent-rows", () => {
+        this.searchItem.setNbRows(this._settings.get_int("recent-rows"));
+      },
       this,
     );
   }
