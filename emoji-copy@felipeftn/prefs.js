@@ -147,8 +147,48 @@ export default class EmojiCopyPrefs extends ExtensionPreferences {
         this._window._settings.bind('keep-open', keep_open, 'active', Gio.SettingsBindFlags.DEFAULT);
         this._window._settings.bind('active-keybind', active_keybind, 'active', Gio.SettingsBindFlags.DEFAULT);
 
+        // Size and layout of the emoji grid
+        this._appearance(general_pg);
+
         // Mouse and keyboard shortcuts reference
         this._shortcuts(general_pg);
+    }
+
+    _appearance(page) {
+        const settings = this._window._settings;
+        const appearance_gp = new Adw.PreferencesGroup({
+            title: _('Appearance'),
+        });
+        page.add(appearance_gp);
+
+        // Ranges match the schema
+        const emoji_size = Adw.SpinRow.new_with_range(8, 128, 1);
+        emoji_size.set_title(_('Emoji Size'));
+        emoji_size.set_subtitle(_('Size of the emojis, in pixels.'));
+        appearance_gp.add(emoji_size);
+
+        const nb_cols = Adw.SpinRow.new_with_range(1, 40, 1);
+        nb_cols.set_title(_('Emojis per Row'));
+        appearance_gp.add(nb_cols);
+
+        const recent_rows = Adw.SpinRow.new_with_range(1, 5, 1);
+        recent_rows.set_title(_('Rows of Recent Emojis'));
+        recent_rows.set_subtitle(_('Rows used for recently used emojis and search results.'));
+        appearance_gp.add(recent_rows);
+
+        settings.bind('emojisize', emoji_size, 'value', Gio.SettingsBindFlags.DEFAULT);
+        settings.bind('nbcols', nb_cols, 'value', Gio.SettingsBindFlags.DEFAULT);
+        settings.bind('recent-rows', recent_rows, 'value', Gio.SettingsBindFlags.DEFAULT);
+
+        // The menu has no fixed width: each emoji is a 1.5em square
+        // (.EmojisItemStyle), so the width follows from size and columns.
+        const updateWidthHint = () => {
+            const width = Math.round(settings.get_int('nbcols') * settings.get_int('emojisize') * 1.5);
+            nb_cols.set_subtitle(_('Menu width: about %d px').replace('%d', width));
+        };
+        updateWidthHint();
+        settings.connect('changed::nbcols', updateWidthHint);
+        settings.connect('changed::emojisize', updateWidthHint);
     }
 
     _openAboutPage() {

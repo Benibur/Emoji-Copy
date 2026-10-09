@@ -15,6 +15,7 @@ export class EmojiSearchItem {
     this._nbColumns = nbColumns;
     this.emojiCopy = emojiCopy;
     this._settings = this.emojiCopy._settings;
+    this._nbRows = this._settings.get_int("recent-rows");
 
     this.searchEntry = new St.Entry({
       name: "searchEntry",
@@ -119,7 +120,7 @@ export class EmojiSearchItem {
     }
     searchedText = searchedText.toLowerCase().trim();
 
-    for (let j = 0; j < this._nbColumns; j++) {
+    for (let j = 0; j < this._recents.length; j++) {
       this._recents[j].super_btn.label = "";
     }
 
@@ -147,7 +148,7 @@ export class EmojiSearchItem {
 
     let firstEmptyIndex = 0;
     for (let i = 0; i < results.length; i++) {
-      if (i < this._nbColumns) {
+      if (i < this._recents.length) {
         this._recents[firstEmptyIndex].super_btn.label = results[i].unicode;
         this._recents[firstEmptyIndex].super_btn.text = results[i].description;
         firstEmptyIndex++;
@@ -170,25 +171,39 @@ export class EmojiSearchItem {
       reactive: false,
       can_focus: false,
     });
-    this._recentsContainer = new St.BoxLayout();
+    // One horizontal box per row, stacked vertically. Clutter.BoxLayout's
+    // orientation works on every supported shell version, unlike
+    // St.BoxLayout's vertical/orientation properties.
+    this._recentsContainer = new St.Widget({
+      layout_manager: new Clutter.BoxLayout({
+        orientation: Clutter.Orientation.VERTICAL,
+      }),
+    });
     recentlyUsed.add_child(this._recentsContainer);
     this._recents = [];
     this._rebuildRecentsButtons();
     return recentlyUsed;
   }
 
-  // (Re)creates the recents row to match this._nbColumns
+  // (Re)creates the recents rows to match this._nbColumns x this._nbRows
   _rebuildRecentsButtons() {
     this._recents.forEach((b) => b.destroy());
     this._recents = [];
+    this._recentsContainer.destroy_all_children();
 
-    for (let i = 0; i < this._nbColumns; i++) {
+    let row;
+    for (let i = 0; i < this._nbColumns * this._nbRows; i++) {
+      if (i % this._nbColumns === 0) {
+        row = new St.BoxLayout();
+        this._recentsContainer.add_child(row);
+      }
       this._recents[i] = new EmojiButton(this.emojiCopy, "", []);
       this._recents[i].build(null);
-      this._recentsContainer.add_child(this._recents[i].super_btn);
+      row.add_child(this._recents[i].super_btn);
     }
 
     this._buildRecents();
+    this._updateSensitivity();
     this.updateStyleRecents();
   }
 
@@ -199,25 +214,29 @@ export class EmojiSearchItem {
     this._rebuildRecentsButtons();
   }
 
+  // Same as setNbCols(), for the number of rows of recents.
+  setNbRows(nbRows) {
+    this._nbRows = nbRows;
+    this._rebuildRecentsButtons();
+  }
+
   saveRecents() {
     let backUp = [];
-    for (let i = 0; i < this._nbColumns; i++) {
-      backUp.push(this._recents[i].super_btn.label);
+    for (let i = 0; i < this._recents.length; i++) {
+      const label = this._recents[i].super_btn.label;
+      if (label !== "") {
+        backUp.push(label);
+      }
     }
     this._settings.set_strv("recently-used", backUp);
   }
 
   _buildRecents() {
     let temp = this._settings.get_strv("recently-used");
-    for (let i = 0; i < this._nbColumns; i++) {
-      if (i < temp.length) {
-        this._recents[i].super_btn.label = temp[i];
-      } else {
-        // If the extension was previously set with less "recently used
-        // emojis", we still need to load something in the labels.
-        // It will be a penguin for obvious reasons.
-        this._recents[i].super_btn.label = "🐧";
-      }
+    for (let i = 0; i < this._recents.length; i++) {
+      // Slots beyond the history (e.g. after adding a row) stay empty until
+      // new emojis are used; _updateSensitivity() makes them unfocusable.
+      this._recents[i].super_btn.label = i < temp.length ? temp[i] : "";
     }
   }
 

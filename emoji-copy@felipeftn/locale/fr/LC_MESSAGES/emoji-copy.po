@@ -132,3 +132,31 @@ msgstr "Hommes"
 #: emoji-copy@felipeftn/emojiSearchItem.js:24
 msgid "Type here to search…"
 msgstr "Tapez pour rechercher…"
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Appearance"
+msgstr "Apparence"
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Emoji Size"
+msgstr "Taille des emojis"
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Size of the emojis, in pixels."
+msgstr "Taille des emojis, en pixels."
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Emojis per Row"
+msgstr "Emojis par ligne"
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Rows of Recent Emojis"
+msgstr "Lignes d'emojis récents"
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Rows used for recently used emojis and search results."
+msgstr "Lignes utilisées pour les emojis récents et les résultats de recherche."
+
+#: emoji-copy@felipeftn/prefs.js
+msgid "Menu width: about %d px"
+msgstr "Largeur du menu : environ %d px"
